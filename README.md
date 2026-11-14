@@ -129,7 +129,7 @@ python -m unittest discover -s tools -p "test_*.py"
 
 ## Use of AI
 
-AI coding assistants (Anthropic Claude) were used to help write and review parts of the code, tests, translations and documentation. The team chose the problem, the approach, the data sources and the design, and reviewed and tested the output. No AI-generated images, video or audio are used in the app. NASA logos and brand elements are not used.
+AI coding assistants were used to help write and review parts of the code, tests, translations and documentation. The team chose the problem, the approach, the data sources and the design, and reviewed and tested the output. No AI-generated images, video or audio are used in the app. NASA logos and brand elements are not used.
 
 ## Team IAFL
 
