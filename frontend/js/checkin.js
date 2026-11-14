@@ -196,6 +196,10 @@ function build() {
     } catch (err) {
       const f = err.field ? byId.get(err.field) : null;
       if (f) {
+        // In step-by-step mode the field may be hidden: go to its step, as for a browser-side error.
+        formError.replaceChildren(errorBox(err.message));
+        currentField = fields.indexOf(f);
+        showField();
         setError(f, err.message);
         f.focus();
       } else {

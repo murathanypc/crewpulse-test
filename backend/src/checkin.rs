@@ -63,7 +63,7 @@ pub async fn post_checkin(
     let astro_id = input.astronaut_id;
 
     // Store the check-in in its own scope so the lock is released before any await.
-    let cid = {
+    let (cid, replayed) = {
         let mut conn = db::lock(&st)?;
         save_checkin(&mut conn, &input)?
     };
@@ -97,8 +97,9 @@ pub async fn post_checkin(
     }
     let status = build_status(&conn, astro_id, None)?;
     // The status always describes the latest check-in. A repeated submission of an older one
-    // must not return the assessment of a different check-in.
-    if status["checkin"]["id"].as_i64() != Some(cid) {
+    // must not return the assessment of a different check-in. Only replays are checked: a new
+    // check-in that races with another one was saved and must still succeed.
+    if replayed && status["checkin"]["id"].as_i64() != Some(cid) {
         return Err(AppError::bad(
             "This check-in was already saved and a newer check-in exists. Reload the page to see the current assessment.",
         ));
@@ -110,7 +111,8 @@ pub async fn post_checkin(
 }
 
 /// Validates the body against the database, then inserts the check-in and its readings in one transaction.
-fn save_checkin(conn: &mut Connection, input: &CheckinIn) -> Result<i64, AppError> {
+/// Returns the check-in id and whether it was an earlier submission repeated with the same id.
+fn save_checkin(conn: &mut Connection, input: &CheckinIn) -> Result<(i64, bool), AppError> {
     if input
         .notes
         .as_deref()
@@ -136,7 +138,7 @@ fn save_checkin(conn: &mut Connection, input: &CheckinIn) -> Result<i64, AppErro
                     "Submission id already used with different readings",
                 ));
             }
-            return Ok(int(&row, "checkin_id").unwrap());
+            return Ok((int(&row, "checkin_id").unwrap(), true));
         }
     }
     let astro = match first_row(
@@ -232,7 +234,7 @@ fn save_checkin(conn: &mut Connection, input: &CheckinIn) -> Result<i64, AppErro
         )?;
     }
     tx.commit()?;
-    Ok(cid)
+    Ok((cid, false))
 }
 
 /// Runs `python ml/score.py` with a timeout. Returns true only when it exits 0.
@@ -290,8 +292,9 @@ mod tests {
             readings: vec![],
             notes: None,
         };
-        let a = save_checkin(&mut conn, &input).unwrap();
-        assert_eq!(a, save_checkin(&mut conn, &input).unwrap());
+        let (a, replayed) = save_checkin(&mut conn, &input).unwrap();
+        assert!(!replayed);
+        assert_eq!((a, true), save_checkin(&mut conn, &input).unwrap());
         let count: i64 = conn
             .query_row("SELECT COUNT(*) FROM checkins", [], |r| r.get(0))
             .unwrap();

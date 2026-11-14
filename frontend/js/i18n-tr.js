@@ -1104,4 +1104,5 @@ Reaction test => Reaksiyon testi
 HEALTH SERVER · CONNECTED · SIMULATED CREW DATA => SAĞLIK SUNUCUSU · BAĞLI · SİMÜLE MÜRETTEBAT VERİSİ
 HEALTH SERVER · CONNECTED => SAĞLIK SUNUCUSU · BAĞLI
 Radiation: Solar particle event in progress. Go to the storm shelter now. => Radyasyon: Güneş parçacık olayı sürüyor. Hemen fırtına sığınağına gidin.
+{num} responses · {num2} early presses · {num3} slow responses (≥500 ms; prototype threshold) · {num4} unanswered signal => {num} yanıt · {num2} erken basış · {num3} yavaş yanıt (≥500 ms; prototip eşiği) · {num4} yanıtlanmamış sinyal
 `;
