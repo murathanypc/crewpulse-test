@@ -12,7 +12,7 @@ try {
   api.environment(ctx.astronautId),
   api.history(ctx.astronautId, 90).catch(() => null),
  ]);
- document.getElementById('connection').textContent=health.model==='mock'?'DEMO MODE · SIMULATED DATA · RECORDS ARE PREVIEWS':'LOCAL HEALTH SERVER · CONNECTED';
+ document.getElementById('connection').textContent=health.model==='mock'?'DEMO MODE · SIMULATED DATA · RECORDS ARE PREVIEWS':health.data==='simulated'?'HEALTH SERVER · CONNECTED · SIMULATED CREW DATA':'HEALTH SERVER · CONNECTED';
  document.getElementById('crew-line').textContent=`${status.astronaut.name} · Mission day ${status.astronaut.mission_day} · ${status.mission.name}`;
  const taken=status.checkin?.taken_at;
  const stale=status.freshness?.state!=='current';
@@ -33,6 +33,10 @@ try {
        el('div',{class:'metric-tile'},el('small',{},'Relative humidity'),el('strong',{},Number(cabin.humidity_pct).toFixed(1)),el('small',{},'%'))),
      el('p',{class:'trust-note'},'This is environmental context; it does not change the health score. A simulation value must not be interpreted as a measurement.'));
    document.getElementById('metrics').parentElement.after(card);
+ }
+ // A solar particle event needs its own shelter instruction; it always raises triage, so show it first.
+ if(status.radiation?.active_event){
+   document.getElementById('urgent').append(el('p',{class:'orbit-notice orbit-notice--alert'},'Radiation: Solar particle event in progress. Go to the storm shelter now.'));
  }
  if(stale || status.triage.level>0){
    const severity=!stale && status.triage.level>=2?'alert':'watch';
@@ -85,7 +89,7 @@ try {
  }
  root.append(el('a',{class:'btn',href:'checkin.html'},'Re-measure and assess →'));
  document.getElementById('export').onclick=()=>{
-  const payload={created_at:new Date().toISOString(),kind:'crew-health-handoff',demo:health.model==='mock',status,mind_checkin:mind,completed_steps:done.map(i=>steps[i]),limitations:'Prototype; estimates are not measurements. No causal inference or diagnosis.'};
+  const payload={created_at:new Date().toISOString(),kind:'crew-health-handoff',demo:health.model==='mock'||health.data==='simulated',data_source:health.data||health.model,status,mind_checkin:mind,completed_steps:done.map(i=>steps[i]),limitations:'Prototype; estimates are not measurements. No causal inference or diagnosis.'};
   const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
   const a=el('a',{href:url,download:'crewpulse-handoff.json'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  };

@@ -2,7 +2,8 @@
 
 **Team IAFL** · NASA Space Apps Challenge 2026 · Challenge: *Create Health Monitoring Software for Astronauts on Space Missions*
 
-- **Live app:** _add the Render link here_
+- **Live app:** _add the Render link here_ (free hosting: the first load can take about a minute while the server wakes up)
+- **Demo:** _add the slide deck or video link here_
 - **Source code:** this repository
 
 On a Mars mission a message to the flight surgeon takes up to 22 minutes one way. CrewPulse helps astronauts check their own health every day, see what changed against their personal baseline, and know what to do next, with guidance that adapts to how far the crew is from Earth.
@@ -119,9 +120,11 @@ python -m unittest discover -s tools -p "test_*.py"
 
 ## Honest limits
 
-- The crew and their history are simulated. The anomaly model learns the patterns of that data, not of real astronauts.
+- The crew and their history are simulated. Crew names are fictional and do not refer to real astronauts. The anomaly model learns the patterns of that data, not of real astronauts.
 - The live demo scores check-ins with personal z-scores. The TensorFlow autoencoder was trained and tested locally, but TensorFlow does not fit the small free hosting instance.
 - The live demo rebuilds its data on every restart, so check-ins entered by visitors do not persist.
+- The demo has no login so judges can try it: anyone can read the simulated crew data and add check-ins, and visitors share the same demo crew. A real deployment would need sign-in and per-astronaut access checks on the server.
+- The interface shows the first crew member; the other four simulated astronauts are available through the API.
 - Bone values are projections from published average loss rates, not scans.
 - Radiation dose is an estimate from a simplified shielding model. The strongest dose event in the demo history is a simulated solar particle event and is labelled as simulated; real DONKI and Fermi GBM events are shown as context.
 - Mind Lab is an independent prototype inspired by the NASA Cognition approach, not the NASA Cognition test. Its thresholds are visible prototype rules, not validated clinical cutoffs.
@@ -129,7 +132,27 @@ python -m unittest discover -s tools -p "test_*.py"
 
 ## Use of AI
 
-AI coding assistants were used to help write and review parts of the code, tests, translations and documentation. The team chose the problem, the approach, the data sources and the design, and reviewed and tested the output. No AI-generated images, video or audio are used in the app. NASA logos and brand elements are not used.
+AI coding assistants were used to help write and review parts of the code, tests, translations and documentation. The team chose the problem, the approach, the data sources and the design, and reviewed and tested the output.
+
+No AI image, video or audio generators were used. The pictures in the app are Health Icons (CC0) and simple vector drawings written as SVG code (the logo, the cup and plate drawings and the measurement-step drawings in `frontend/img/measure/`); that SVG code falls under the AI-assisted coding statement above. NASA logos, insignia, flags and mission identifiers are not used; "NASA" appears only as text to name data sources.
+
+## References and licenses
+
+Every threshold, rate and guidance text in the app cites its source in `data/seed/sources.json` (shown in the app on each indicator card); values without a source are labelled `assumption`. `docs/SOURCE-AUDIT.md` explains how each value was checked.
+
+| Third-party material | License |
+|---|---|
+| NASA DONKI, Fermi GBM, ISS TEPC data | NASA open data |
+| [Health Icons](https://healthicons.org) (`frontend/img/healthicons/`) | CC0 1.0 |
+| Rust crates: axum, tokio, tower-http, rusqlite (bundled SQLite), serde, serde_json, chrono | MIT or MIT/Apache-2.0; SQLite is public domain |
+| TensorFlow (optional) | Apache-2.0 |
+| NumPy | BSD-3-Clause |
+
+No copyrighted images, music or text are included. The frontend uses no external libraries or CDNs.
+
+## License
+
+CrewPulse is released under the [Apache License 2.0](LICENSE).
 
 ## Team IAFL
 
@@ -141,5 +164,3 @@ AI coding assistants were used to help write and review parts of the code, tests
 | Mehmet Recep Baltacı | Designer |
 | Semih Bakır | Researcher |
 | Yusuf Şahin | Developer |
-
-Icons: [Health Icons](https://healthicons.org) (see `frontend/img/healthicons/LICENSE.txt`).

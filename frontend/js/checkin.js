@@ -72,8 +72,12 @@ async function boot() {
     build();
   });
   const seq = ++configSeq;
-  const nextCfg = await loadAstronautConfig(astronautId);
-  if (seq === configSeq) config = nextCfg;
+  try {
+    const nextCfg = await loadAstronautConfig(astronautId);
+    if (seq === configSeq) config = nextCfg;
+  } catch {
+    // Personal ranges could not load: keep the general config from initShell so the form still opens.
+  }
   build();
 }
 
@@ -186,6 +190,7 @@ function build() {
         recovery.textContent = 'The local draft could not be stored; the record will still be sent to the health server.';
       }
       const res = await api.submitCheckin(pending.payload);
+      clearTimeout(draftTimer); // a pending draft save must not bring back the submitted record
       try { await localRecord(localKey, null); } catch { /* submission already succeeded */ }
       showResult(res);
     } catch (err) {
@@ -233,10 +238,12 @@ function build() {
   const recovery = el('p', {class:'trust-note', role:'status'}, 'The draft is stored in this browser. If the connection drops, you can submit the same record again.');
   form.prepend(recovery);
   let draftTimer;
-  form.addEventListener('input', () => {
+  const saveDraft = () => {
     clearTimeout(draftTimer);
     draftTimer=setTimeout(()=>localRecord(localKey,{pending,readings:fields.filter(f=>f.read()!==null).map(f=>({indicator_id:f.ind.id,value:f.read(),method:f.method})),notes:notes.value}).catch(()=>{recovery.textContent='The draft could not be stored. Check browser storage.';}),250);
-  });
+  };
+  form.addEventListener('input', saveDraft);
+  form.addEventListener('draftchange', saveDraft);
   localRecord(localKey).then(draft=>{
     if(!draft)return;pending=draft.pending;
     const restore=el('button',{type:'button',class:'btn',onclick:()=>{
@@ -323,6 +330,9 @@ function buildField(ind) {
     input.value = String(v);
     f.method = method;
     setError(f, null);
+    // Tools (pulse counter, reaction and eye tests) set the value in code, which fires no input event,
+    // so tell the form to save the draft. Not 'input': that would reset the method to manual.
+    input.dispatchEvent(new CustomEvent('draftchange', { bubbles: true }));
   };
   input.addEventListener('input', () => {
     f.method = 'manual';

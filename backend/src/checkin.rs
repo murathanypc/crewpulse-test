@@ -96,6 +96,13 @@ pub async fn post_checkin(
         anomaly::save(&conn, cid, &a, None)?;
     }
     let status = build_status(&conn, astro_id, None)?;
+    // The status always describes the latest check-in. A repeated submission of an older one
+    // must not return the assessment of a different check-in.
+    if status["checkin"]["id"].as_i64() != Some(cid) {
+        return Err(AppError::bad(
+            "This check-in was already saved and a newer check-in exists. Reload the page to see the current assessment.",
+        ));
+    }
     Ok((
         StatusCode::CREATED,
         Json(json!({ "checkin_id": cid, "status": status })),
@@ -167,11 +174,29 @@ fn save_checkin(conn: &mut Connection, input: &CheckinIn) -> Result<i64, AppErro
                 &r.indicator_id,
             ));
         }
+        // Rating scales and counted squares are whole numbers; the form only offers whole numbers.
+        let whole = matches!(sval(ind, "input_type").as_str(), "scale" | "amsler");
+        if whole && r.value.fract() != 0.0 {
+            return Err(AppError::bad_field(
+                format!("{} must be a whole number.", sval(ind, "name")),
+                &r.indicator_id,
+            ));
+        }
         let method = r.method.as_deref().unwrap_or("manual");
         if !METHODS.contains(&method) {
             return Err(AppError::bad_field(
                 "Unknown measurement method.",
                 &r.indicator_id,
+            ));
+        }
+    }
+
+    let value_of = |id: &str| input.readings.iter().find(|r| r.indicator_id == id).map(|r| r.value);
+    if let (Some(sys), Some(dia)) = (value_of("systolic_bp"), value_of("diastolic_bp")) {
+        if dia >= sys {
+            return Err(AppError::bad_field(
+                "Diastolic (bottom number) must be lower than systolic (top number).",
+                "diastolic_bp",
             ));
         }
     }
@@ -287,5 +312,33 @@ mod tests {
             notes: Some("x".repeat(4001)),
         };
         assert!(save_checkin(&mut conn, &input).is_err());
+    }
+
+    fn reading(id: &str, value: f64) -> ReadingIn {
+        ReadingIn { indicator_id: id.into(), value, method: None }
+    }
+
+    #[test]
+    fn half_ratings_and_inverted_blood_pressure_are_rejected() {
+        let mut conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch(include_str!("../../db/schema.sql")).unwrap();
+        conn.execute_batch("CREATE TABLE IF NOT EXISTS submission_keys(key TEXT PRIMARY KEY, checkin_id INTEGER, payload TEXT);
+          INSERT INTO missions(id,name,comms_delay_s,consult_mode,gravity_g,gcr_msv_per_day) VALUES('test','Test',0,'ground_led',0,0);
+          INSERT INTO astronauts(id,name,mission_id,mission_start) VALUES(1,'Test','test','2026-01-01');
+          INSERT INTO body_regions(id,name,display_order) VALUES('heart','Heart',1);
+          INSERT INTO indicators(id,name,unit,body_region_id,input_type,min_plausible,max_plausible) VALUES
+            ('mood','Mood','score','heart','scale',1,5),
+            ('systolic_bp','Systolic','mmHg','heart','number',40,300),
+            ('diastolic_bp','Diastolic','mmHg','heart','number',20,200);").unwrap();
+        let mut input = CheckinIn { astronaut_id: 1, client_submission_id: None, readings: vec![reading("mood", 1.5)], notes: None };
+        let err = save_checkin(&mut conn, &input).unwrap_err();
+        assert!(format!("{:?}", err).contains("whole number"));
+
+        input.readings = vec![reading("mood", 3.0), reading("systolic_bp", 95.0), reading("diastolic_bp", 150.0)];
+        let err = save_checkin(&mut conn, &input).unwrap_err();
+        assert!(format!("{:?}", err).contains("lower than systolic"));
+
+        input.readings = vec![reading("mood", 3.0), reading("systolic_bp", 118.0), reading("diastolic_bp", 76.0)];
+        assert!(save_checkin(&mut conn, &input).is_ok());
     }
 }

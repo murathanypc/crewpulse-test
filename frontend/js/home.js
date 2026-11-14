@@ -236,8 +236,10 @@ function renderAll(s) {
 
 // ---- Master alert: the first thing on the page when something needs attention ----
 
+// An active solar particle event always raises triage to level 2, so the shelter banner
+// is shown on its own first and the health headline stays visible below it.
 function masterAlertTone(s) {
-  if (s.radiation.active_event && s.triage.level < 2) return 'radiation';
+  if (s.radiation.active_event) return 'radiation';
   if (s.triage.level >= 2) return 'alert';
   if (s.triage.level === 1) return 'watch';
   return null;
@@ -245,14 +247,13 @@ function masterAlertTone(s) {
 
 function renderMasterAlert(s) {
   const t = s.triage;
-  const tone = masterAlertTone(s);
-  let node = null;
-  if (tone === 'radiation') {
-    node = masterAlert('radiation', 'Solar particle event in progress', `Go to ${state.zoneName || s.radiation.recommended_zone_id || 'the shelter'}`);
-  } else if (tone === 'alert' || tone === 'watch') {
-    node = masterAlert(tone, plainHeadline(t.headline));
+  const nodes = [];
+  if (s.radiation.active_event) {
+    nodes.push(masterAlert('radiation', 'Solar particle event in progress', `Go to ${state.zoneName || s.radiation.recommended_zone_id || 'the shelter'}`));
   }
-  $('master-alert').replaceChildren(...(node ? [node] : []));
+  const tone = t.level >= 2 ? 'alert' : t.level === 1 ? 'watch' : null;
+  if (tone && t.headline) nodes.push(masterAlert(tone, plainHeadline(t.headline)));
+  $('master-alert').replaceChildren(...nodes);
 }
 
 // ---- Header ----

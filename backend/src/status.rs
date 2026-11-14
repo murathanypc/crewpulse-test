@@ -657,7 +657,7 @@ pub fn build_status(
             .replace("{delay}", &delay_text)
             .replace("{reply_minutes}", &reply.to_string())
     };
-    let (headline, contact, instructions) = match &action {
+    let (mut headline, contact, mut instructions) = match &action {
         Some(a) => (
             fill(sval(a, "headline")),
             fill(sval(a, "contact")),
@@ -665,6 +665,16 @@ pub fn build_status(
         ),
         None => (String::new(), String::new(), Vec::new()),
     };
+    // An old critical reading keeps its level (it was never cleared), but the crew must see that
+    // it is old and re-measure before acting on it.
+    if !fresh && n_alert >= 1 {
+        let hours = age_hours.map(|h| fmt_num(h, 0)).unwrap_or_else(|| "?".to_string());
+        headline = format!("Last reading ({} h ago) was critical: re-measure now. {}", hours, headline);
+        instructions.insert(
+            0,
+            format!("Re-measure now: the last reading is {} hours old. If it is still outside the safe limit, follow the steps below.", hours),
+        );
+    }
 
     // Guidance for each out-of-range reading, alerts first.
     let mut flagged: Vec<&Reading> = readings
