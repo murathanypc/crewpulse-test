@@ -1100,4 +1100,5 @@ ACTIVITY & RECOMMENDATIONS / INTEGRATED DAILY PLAN => AKTİVİTE VE ÖNERİLER /
 Today's activity and recommendations. => Bugünün aktivite ve önerileri.
 Health check-in, seven-day activity, recovery, gravity and cabin environment are assessed together; sudden increases are limited. => Sağlık kontrolü, son yedi günlük aktivite, toparlanma, yerçekimi ve kabin ortamı birlikte değerlendirilir; ani artışlar sınırlandırılır.
 This tool is prototype decision support. It shows links, not a diagnosis; it does not replace the flight surgeon, crew medical officer or mission-approved exercise protocol. => Bu araç prototip karar desteğidir. İlişki gösterir, tanı koymaz; uçuş cerrahının, mürettebat sağlık sorumlusunun veya görev için onaylanmış egzersiz protokolünün yerini almaz.
+Reaction test => Reaksiyon testi
 `;
