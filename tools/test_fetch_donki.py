@@ -67,5 +67,10 @@ class FetchDonkiTest(unittest.TestCase):
                 fetch_donki.fetch("CME", None, None, "k")
 
 
+    def test_real_sep_is_context_only(self):
+        row = fetch_donki.to_row("SEP", RECORDS["SEP"])
+        self.assertEqual((row["event_type"], row["dose_relevant"]), ("SEP", 0))
+
+
 if __name__ == "__main__":
     unittest.main()

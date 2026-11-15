@@ -121,9 +121,10 @@ def to_row(kind, rec):
     if not isinstance(rec, dict):
         return None
     if kind == "SEP":
+        # Real SEP rows are context only (README, Honest limits); only the simulated storm adds dose.
         event_id, start = rec.get("sepID"), norm_time(rec.get("eventTime"))
         row = {"id": event_id, "event_type": "SEP", "start_time": start, "end_time": None,
-               "class_type": None, "severity": SEP_SEVERITY, "dose_relevant": 1, "source": "donki",
+               "class_type": None, "severity": SEP_SEVERITY, "dose_relevant": 0, "source": "donki",
                "link": rec.get("link"), "note": None}
     elif kind == "FLR":
         event_id, start = rec.get("flrID"), norm_time(rec.get("beginTime"))

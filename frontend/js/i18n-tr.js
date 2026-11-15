@@ -547,6 +547,7 @@ Download mission summary ↓ => Görev özetini indir ↓
 The summary downloads to your device. It is not sent to ground automatically. Bone and radiation values are model estimates; the displayed demo crew history is simulated. => Özet cihazına indirilir. Yer ekibine otomatik gönderilmez. Kemik ve radyasyon değerleri model tahminidir; gösterilen demo mürettebat geçmişi simülasyondur.
 Space weather ↗ => Uzay hava durumu ↗
 Personal trends ↗ => Kişisel eğilimler ↗
+Gravital Tracking ↗ => Yerçekimi Takibi ↗
 01 / MIND => 01 / ZİHİN
 02 / BODY => 02 / BEDEN
 03 / MISSION => 03 / GÖREV
