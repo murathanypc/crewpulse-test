@@ -95,18 +95,6 @@ function doseBand(value, min, max) {
   return t < 1 / 3 ? 1 : t < 2 / 3 ? 2 : 3;
 }
 
-// Greedy word wrap for zone names, so a name fits its zone at 13 px.
-function wrapText(text, maxPx) {
-  const max = Math.max(6, Math.floor(maxPx / 7.5));
-  const lines = [];
-  for (const word of String(text || '').split(/\s+/).filter(Boolean)) {
-    const last = lines.length - 1;
-    if (last >= 0 && lines[last].length + 1 + word.length <= max) lines[last] = `${lines[last]} ${word}`;
-    else lines.push(word);
-  }
-  return lines;
-}
-
 function selectZone(id) {
   state.zoneId = id;
   for (const [zid, g] of state.zoneEls) {
@@ -176,7 +164,6 @@ function habitatMap(d, zones, width) {
     const zy = z.y * k;
     const zw = z.w * k;
     const zh = z.h * k;
-    const nameLines = wrapText(z.name, zw - 12);
     const g = svg('g', {
       class: 'zone',
       role: 'button',
@@ -190,8 +177,12 @@ function habitatMap(d, zones, width) {
       class: z.is_shelter ? 'zone-rect zone-rect--shelter' : 'zone-rect',
       'data-fill-dose': band,
     }));
-    nameLines.forEach((t, i) => g.append(svg('text', { x: zx + 6, y: zy + 18 + i * 17, class: 'axis-label zone-name' }, t)));
-    g.append(svg('text', { x: zx + 6, y: zy + 18 + nameLines.length * 17, class: 'axis-label zone-value' }, `${fmt(value, 2)} ${unit}`));
+    // HTML label: the browser wraps the whole name, so the translation sees it as one string in any language.
+    const label = svg('foreignObject', { x: zx + 2, y: zy + 3, width: Math.max(0, zw - 4), height: Math.max(0, zh - (z.is_shelter ? 24 : 6)) });
+    label.append(el('div', { class: 'zone-label' },
+      el('div', { class: 'zone-name' }, z.name),
+      el('div', { class: 'zone-value' }, `${fmt(value, 2)} ${unit}`)));
+    g.append(label);
     if (z.is_shelter) g.append(svg('text', { x: zx + 6, y: zy + zh - 8, class: 'axis-label zone-tag' }, 'Shelter'));
     if (z.id === state.zoneId) g.classList.add('zone--selected');
     g.addEventListener('click', () => selectZone(z.id));

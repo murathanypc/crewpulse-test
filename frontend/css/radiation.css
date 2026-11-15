@@ -31,6 +31,8 @@
 .zone:focus-visible .zone-rect { stroke: var(--focus-ring); stroke-width: 4; stroke-dasharray: none; }
 .habitat .zone-name, .habitat .zone-tag { fill: var(--ink); font-weight: 700; }
 .habitat .zone-value { fill: var(--ink); }
+.zone-label { padding: 0 4px; color: var(--ink); font: 13px/17px var(--font); overflow-wrap: anywhere; pointer-events: none; }
+.zone-label .zone-name { font-weight: 700; }
 .habitat [data-fill-dose="1"] { fill: var(--habitat-dose-1); }
 .habitat [data-fill-dose="2"] { fill: var(--habitat-dose-2); }
 .habitat [data-fill-dose="3"] { fill: var(--habitat-dose-3); }
