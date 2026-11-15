@@ -491,7 +491,7 @@ function evidenceSection() {
       el('div', {}, el('h3', {}, 'How often it happens (% of astronauts)'), incidenceChart(),
         el('p', { class: 'muted gr-note' }, 'A lighter segment shows a reported range. Small study groups (for example 11 astronauts in the clot study) mean large individual differences.')),
       el('div', {}, el('h3', {}, 'How long recovery takes after return'), recoveryChart(),
-        el('p', { class: 'muted gr-note' }, 'Logarithmic time axis. Accounts differ: Rubio recovered in weeks, Marshburn in about three months, and some astronauts did not regain bone loss after a year.'))),
+        el('p', { class: 'muted gr-note' }, 'Logarithmic time axis. Accounts differ: Rubio felt mostly recovered within a couple of weeks, while some astronauts did not regain bone loss after a year.'))),
     el('h3', {}, 'Risk intensity by mission phase'),
     el('p', { class: 'muted' }, '● risk in focus in that phase · ○ symptom expected (information note, no alarm). P1 adaptation, P2 early flight, P3 long flight, P4 landing, P5 recovery.'),
     phaseHeatmap());

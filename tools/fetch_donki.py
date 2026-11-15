@@ -20,7 +20,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-BASE_URL = "https://api.nasa.gov/DONKI"
+# Official DONKI API since 30 Sep 2026 (no key needed); api.nasa.gov with NASA_API_KEY is the fallback.
+BASE_URLS = ("https://ccmc.gsfc.nasa.gov/DONKI-API/get", "https://api.nasa.gov/DONKI")
 # Flares now come from tools/fetch_gbm.py because DONKI FLR returns HTTP 404 (Nov 2026).
 # Failures are skipped per endpoint.
 ENDPOINTS = ("SEP", "CME")
@@ -77,13 +78,24 @@ def windows(first, last, span=DONKI_SPAN_DAYS):
 
 
 def fetch(kind, first, last, api_key):
+    """Try each DONKI address in turn; raise the last error only when all fail."""
+    err = None
+    for base in BASE_URLS:
+        try:
+            return fetch_from(base, kind, first, last, api_key)
+        except FetchError as e:
+            err = e
+    raise err
+
+
+def fetch_from(base, kind, first, last, api_key):
     query = urllib.parse.urlencode({
         "startDate": first.isoformat(),
         "endDate": last.isoformat(),
         "api_key": api_key,
     })
     request = urllib.request.Request(
-        f"{BASE_URL}/{kind}?{query}",
+        f"{base}/{kind}?{query}",
         headers={"User-Agent": "astro-health-seeder/1.0", "Accept": "application/json"})
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT_S) as resp:

@@ -116,7 +116,7 @@ How long recovery takes after return => Dönüşten sonra iyileşme ne kadar sü
 1 year => 1 yıl
 3 years => 3 yıl
 days => gün
-Logarithmic time axis. Accounts differ: Rubio recovered in weeks, Marshburn in about three months, and some astronauts did not regain bone loss after a year. => Logaritmik zaman ekseni. Anlatımlar farklı: Rubio birkaç haftada, Marshburn yaklaşık üç ayda iyileşti; bazı astronotlar bir yıl sonra bile kemik kaybını geri kazanamadı.
+Logarithmic time axis. Accounts differ: Rubio felt mostly recovered within a couple of weeks, while some astronauts did not regain bone loss after a year. => Logaritmik zaman ekseni. Anlatımlar farklı: Rubio birkaç hafta içinde büyük ölçüde toparlandığını hissetti; bazı astronotlar ise bir yıl sonra bile kemik kaybını geri kazanamadı.
 Risk intensity by mission phase => Görev fazına göre risk yoğunluğu
 ● risk in focus in that phase · ○ symptom expected (information note, no alarm). P1 adaptation, P2 early flight, P3 long flight, P4 landing, P5 recovery. => ● o fazda öne çıkan risk · ○ beklenen belirti (bilgi notu, alarm yok). F1 adaptasyon, F2 erken uçuş, F3 uzun uçuş, F4 iniş, F5 iyileşme.
 In focus => Öne çıkıyor
@@ -401,6 +401,16 @@ npj Microgravity: immunity in space => npj Microgravity: uzayda bağışıklık
 Ottawa Hospital Research Institute: space anemia => Ottawa Hastanesi Araştırma Enstitüsü: uzay anemisi
 NASA: Moon and Mars partial gravity => NASA: Ay ve Mars kısmi yerçekimi
 NASA: Life After Microgravity (astronaut accounts) => NASA: Life After Microgravity (astronot anlatımları)
+{x}. Window-equivalent microgravity exposure: {num} days. => {x}. Pencere eşdeğeri mikro yerçekimi maruziyeti: {num} gün.
+Gravity-field transitions detected: {num}. => Saptanan yerçekimi alanı geçişi: {num}.
+Analysis areas: {x}. => Analiz alanları: {x}.
+Evidence: mission profile. => Kanıt: görev profili.
+Evidence: limited human evidence. => Kanıt: insanlarda sınırlı veri.
+bone loading, muscle loading, cardiovascular conditioning => kemik yüklenmesi, kas yüklenmesi, kardiyovasküler kondisyon
+balance coordination, orthostatic readiness => denge ve koordinasyon, ortostatik hazırlık
+bone loading, muscle loading, cardiovascular conditioning, balance coordination, orthostatic readiness => kemik yüklenmesi, kas yüklenmesi, kardiyovasküler kondisyon, denge ve koordinasyon, ortostatik hazırlık
+none flagged => işaretlenen yok
+Context layers support analysis but do not establish a cause. Gravity feeds the bone projection through the latest measured g value; partial-gravity effects remain uncertain. => Bağlam katmanları analizi destekler ama bir neden kanıtlamaz. Yerçekimi, en son ölçülen g değeri üzerinden kemik projeksiyonunu besler; kısmi yerçekimi etkileri belirsizliğini korur.
 `;
 
 export const GRAVITY = `${UI_LINES}\n${DATA_LINES}`;

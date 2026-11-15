@@ -28,7 +28,7 @@ All rules, thresholds, missions, habitat zones and guidance text live in the SQL
 
 | Data | How it is used |
 |---|---|
-| NASA DONKI (api.nasa.gov) solar particle events and CMEs | Live space-weather events for the radiation view and trends; fetched on every server start |
+| NASA DONKI (NASA CCMC DONKI API, with api.nasa.gov as fallback) solar particle events and CMEs | Live space-weather events for the radiation view and trends; fetched on every server start |
 | Fermi GBM solar flare list (NASA GSFC) | Live flare events shown with the radiation context |
 | ISS TEPC dose measurements (NASA CDAWeb) | ISS background dose rate (`tools/fetch_tepc.py`) |
 | NASA Human Research Program: 5 hazards and risks | Each indicator is mapped to a spaceflight hazard |
@@ -76,7 +76,7 @@ Then open http://127.0.0.1:8080.
 
 Optional, the TensorFlow model: `pip install -r ml/requirements.txt`, then `python ml/train.py`.
 
-Optional, real space weather (needs internet). Without `NASA_API_KEY` the fetcher uses the rate-limited `DEMO_KEY`:
+Optional, real space weather (needs internet). DONKI is read from the NASA CCMC DONKI API, which needs no key; if it fails, the fetcher falls back to api.nasa.gov with `NASA_API_KEY` (or the rate-limited `DEMO_KEY`):
 
 ```bash
 python tools/fetch_donki.py --days 30
@@ -96,7 +96,7 @@ The `Dockerfile` builds the Rust server and runs it with the Python tools. On ev
 
 Environment variables:
 
-- `NASA_API_KEY`: your api.nasa.gov key. Set it as a secret in the hosting dashboard; never commit it.
+- `NASA_API_KEY`: your api.nasa.gov key, used only when the CCMC DONKI API fails. Set it as a secret in the hosting dashboard; never commit it.
 - `ASTRO_PUBLIC_HOST`: public host name(s), comma-separated. On Render this is read automatically from `RENDER_EXTERNAL_HOSTNAME`.
 - Optional: `ASTRO_HOST` (default `127.0.0.1`, the container sets `0.0.0.0`), `ASTRO_PORT` or `PORT` (default `8080`), `ASTRO_DB`, `ASTRO_FRONTEND`, `ASTRO_PYTHON`.
 
@@ -109,7 +109,7 @@ Environment variables:
 ## Tests
 
 ```bash
-node --test frontend/js/
+node --test
 ```
 
 ```bash

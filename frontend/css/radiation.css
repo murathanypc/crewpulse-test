@@ -29,8 +29,7 @@
 .zone-rect--shelter { stroke: var(--accent); stroke-width: 3; stroke-dasharray: 8 5; }
 .zone--selected .zone-rect { stroke: var(--accent); stroke-width: 4; stroke-dasharray: none; }
 .zone:focus-visible .zone-rect { stroke: var(--focus-ring); stroke-width: 4; stroke-dasharray: none; }
-.habitat .zone-name, .habitat .zone-tag { fill: var(--ink); font-weight: 700; }
-.habitat .zone-value { fill: var(--ink); }
+.habitat .zone-tag { fill: var(--ink); font-weight: 700; }
 .zone-label { padding: 0 4px; color: var(--ink); font: 13px/17px var(--font); overflow-wrap: anywhere; pointer-events: none; }
 .zone-label .zone-name { font-weight: 700; }
 .habitat [data-fill-dose="1"] { fill: var(--habitat-dose-1); }

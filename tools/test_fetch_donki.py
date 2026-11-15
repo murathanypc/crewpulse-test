@@ -48,5 +48,24 @@ class FetchDonkiTest(unittest.TestCase):
         self.assertEqual(self.run_main(fake), (1, 0))
 
 
+    def test_falls_back_to_second_address(self):
+        calls = []
+        def fake_from(base, kind, first, last, key):
+            calls.append(base)
+            if base == fetch_donki.BASE_URLS[0]:
+                raise fetch_donki.FetchError("NASA DONKI CME sent a response that is not JSON.")
+            return [RECORDS[kind]]
+        with mock.patch.object(fetch_donki, "fetch_from", fake_from):
+            self.assertEqual(fetch_donki.fetch("CME", None, None, "k"), [RECORDS["CME"]])
+        self.assertEqual(calls, list(fetch_donki.BASE_URLS))
+
+    def test_all_addresses_fail(self):
+        def fake_from(base, kind, first, last, key):
+            raise fetch_donki.FetchError(f"fail {base}")
+        with mock.patch.object(fetch_donki, "fetch_from", fake_from):
+            with self.assertRaisesRegex(fetch_donki.FetchError, "api.nasa.gov"):
+                fetch_donki.fetch("CME", None, None, "k")
+
+
 if __name__ == "__main__":
     unittest.main()
