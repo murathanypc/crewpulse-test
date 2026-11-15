@@ -228,6 +228,12 @@ function build() {
   const overview = el('button',{type:'button',class:'btn',onclick:()=>{focused=!focused;showField();}},'Show all');
   const wizard=el('div',{class:'lab-footer'},previous,overview,next);
   form.prepend(progress);form.append(wizard);
+  // Step by step, Enter in a field means "next measurement": the browser would submit the whole form
+  // and jump to the first empty required field with an error. On the last step Enter opens the review.
+  form.addEventListener('keydown',(e)=>{
+    if(e.key!=='Enter'||!focused||currentField===fields.length-1||e.target.tagName!=='INPUT')return;
+    e.preventDefault();next.click();fields[currentField].focus();
+  });
   function showField(){
     form.classList.toggle("focused-form",focused);
     for(const stop of cleanups)stop();

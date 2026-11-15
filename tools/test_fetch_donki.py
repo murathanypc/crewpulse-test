@@ -72,5 +72,21 @@ class FetchDonkiTest(unittest.TestCase):
         self.assertEqual((row["event_type"], row["dose_relevant"]), ("SEP", 0))
 
 
+    def test_api_key_only_goes_to_api_nasa_gov(self):
+        from datetime import date
+        urls = []
+        class Resp(io.BytesIO):
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+        def fake_urlopen(request, timeout=None):
+            urls.append(request.full_url)
+            return Resp(b"[]")
+        with mock.patch.object(fetch_donki.urllib.request, "urlopen", fake_urlopen):
+            for base in fetch_donki.BASE_URLS:
+                fetch_donki.fetch_from(base, "CME", date(2026, 11, 1), date(2026, 11, 2), "SECRET")
+        self.assertNotIn("SECRET", urls[0])
+        self.assertIn("api_key=SECRET", urls[1])
+
+
 if __name__ == "__main__":
     unittest.main()

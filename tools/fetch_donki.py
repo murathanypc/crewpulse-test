@@ -89,11 +89,10 @@ def fetch(kind, first, last, api_key):
 
 
 def fetch_from(base, kind, first, last, api_key):
-    query = urllib.parse.urlencode({
-        "startDate": first.isoformat(),
-        "endDate": last.isoformat(),
-        "api_key": api_key,
-    })
+    params = {"startDate": first.isoformat(), "endDate": last.isoformat()}
+    if "api.nasa.gov" in base:  # only api.nasa.gov needs the key; never send it to another host
+        params["api_key"] = api_key
+    query = urllib.parse.urlencode(params)
     request = urllib.request.Request(
         f"{base}/{kind}?{query}",
         headers={"User-Agent": "astro-health-seeder/1.0", "Accept": "application/json"})
