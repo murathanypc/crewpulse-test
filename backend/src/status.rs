@@ -427,6 +427,17 @@ pub fn build_status(
     astro_id: i64,
     mission_override: Option<&str>,
 ) -> Result<Value, AppError> {
+    build_status_for(conn, astro_id, mission_override, None)
+}
+
+/// Same as `build_status`, but describes the given check-in instead of the latest one, so a
+/// POST /api/checkins answer always matches its own `checkin_id`, even when two saves race.
+pub fn build_status_for(
+    conn: &Connection,
+    astro_id: i64,
+    mission_override: Option<&str>,
+    checkin_id: Option<i64>,
+) -> Result<Value, AppError> {
     let p = Params::load(conn)?;
     let astro = load_astronaut(conn, astro_id)?;
     let mission_id = sval(&astro, "mission_id");
@@ -439,7 +450,14 @@ pub fn build_status(
     };
 
     let inds = load_indicators(conn)?;
-    let checkin = latest_checkin(conn, astro_id)?;
+    let checkin = match checkin_id {
+        Some(id) => first_row(
+            conn,
+            "SELECT id, taken_at, mission_day FROM checkins WHERE id = ?1 AND astronaut_id = ?2",
+            params![id, astro_id],
+        )?,
+        None => latest_checkin(conn, astro_id)?,
+    };
     let (cid, taken) = match &checkin {
         Some(c) => (int(c, "id").unwrap_or(0), sval(c, "taken_at")),
         None => (0, String::new()),

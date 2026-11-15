@@ -15,7 +15,7 @@ use serde_json::{json, Value};
 use crate::anomaly;
 use crate::db::{self, first_row, int, num, query_rows, sval, AppState, Params, Row};
 use crate::errors::AppError;
-use crate::status::{build_status, checkin_values};
+use crate::status::{build_status_for, checkin_values};
 
 const SCORER_TIMEOUT_S: u64 = 20;
 const METHODS: [&str; 6] = ["manual", "camera", "game", "device", "sim", "import"];
@@ -63,7 +63,7 @@ pub async fn post_checkin(
     let astro_id = input.astronaut_id;
 
     // Store the check-in in its own scope so the lock is released before any await.
-    let (cid, replayed) = {
+    let (cid, _replayed) = {
         let mut conn = db::lock(&st)?;
         save_checkin(&mut conn, &input)?
     };
@@ -95,15 +95,10 @@ pub async fn post_checkin(
         let a = anomaly::zscore(&conn, &p, astro_id, cid, &taken, &values)?;
         anomaly::save(&conn, cid, &a, None)?;
     }
-    let status = build_status(&conn, astro_id, None)?;
-    // The status always describes the latest check-in. A repeated submission of an older one
-    // must not return the assessment of a different check-in. Only replays are checked: a new
-    // check-in that races with another one was saved and must still succeed.
-    if replayed && status["checkin"]["id"].as_i64() != Some(cid) {
-        return Err(AppError::bad(
-            "This check-in was already saved and a newer check-in exists. Reload the page to see the current assessment.",
-        ));
-    }
+    // The assessment always describes this check-in (`cid`), never whichever one is newest: two
+    // saves that race each get their own assessment, and a repeated submission gets the same
+    // answer again instead of an error.
+    let status = build_status_for(&conn, astro_id, None, Some(cid))?;
     Ok((
         StatusCode::CREATED,
         Json(json!({ "checkin_id": cid, "status": status })),

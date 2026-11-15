@@ -2,6 +2,7 @@ import { api } from './api.js';
 import { el, formatDate, formatValue, initShell, showError } from './shell.js';
 import { gravityPoints, seriesDomain, transitionPoints } from './gravity-chart.js';
 import { responsiveChartHeight } from './trend-data.js';
+import { gravityInsights } from './gravity-insights.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const root = document.getElementById('gravity-root');
@@ -152,6 +153,13 @@ function render(data, status, history, bone) {
     el('section', { class: 'panel gravity-overview' }, el('div', {}, el('span', { class: 'eyebrow' }, 'MISSION CONTEXT'), el('h2', {}, `${formatValue(assessment.current_g, 3)} g`), el('p', {}, 'Local gravity · Earth = 1 g')), el('div', {}, el('span', { class: 'eyebrow' }, 'DATA COVERAGE'), el('h2', {}, `${data.readings.length} ${data.readings.length === 1 ? 'record' : 'records'}`), el('p', {}, `Source: ${sourceText}`)), el('div', {}, el('span', { class: 'eyebrow' }, 'EFFECT ON ANALYSIS'), el('p', {}, 'Daily gravity history feeds the bone projection; the current mission context feeds the activity recommendations.'), el('a', { class: 'btn', href: 'activity.html' }, 'Activity and recommendations →'))),
     el('section', { class: 'panel' }, el('h2', {}, 'Current gravity context'), assessmentCards(assessment),
       el('p', { class: 'muted gravity-note' }, `Analysis areas: ${areas.join(', ') || 'none flagged'}. Evidence: ${assessment.evidence === 'limited_human_evidence' ? 'limited human evidence' : 'mission profile'}.`)),
+    ...gravityInsights({
+      g: assessment.current_g,
+      missionId,
+      missionName: ctx.config.missions.find((mission) => mission.id === missionId)?.name || missionId,
+      status,
+      ownMissionName: ctx.config.missions.find((mission) => mission.id === status?.mission?.id)?.name,
+    }),
     healthSection(status, history, bone),
     el('section', { class: 'panel' }, el('h2', {}, 'Local gravity over time'),
       el('p', { class: 'muted' }, 'A vertical dashed marker shows a change of at least 0.05 g.'),
